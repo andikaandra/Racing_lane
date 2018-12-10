@@ -31,8 +31,6 @@
 			<span>Body: <select id="body-mat"></select></span>
 			<span>Rims / Trim: <select id="rim-mat"></select></span>
 			<span>Glass: <select id="glass-mat"></select></span>
-			<br><br>
-			<span>Follow camera: <input type="checkbox" id="camera-toggle"></span>
 		</div>
 
 		<div id="container"></div>
@@ -58,9 +56,6 @@
 			var bodyMatSelect = document.getElementById( 'body-mat' );
 			var rimMatSelect = document.getElementById( 'rim-mat' );
 			var glassMatSelect = document.getElementById( 'glass-mat' );
-
-			var followCamera = document.getElementById( 'camera-toggle' );
-			followCamera.addEventListener( 'change', onFollowCameraToggle );
 
 			var lightHolder = new THREE.Group();
 			var clock = new THREE.Clock();
@@ -279,10 +274,6 @@
 				renderer.setSize( window.innerWidth, window.innerHeight );
 			}
 
-			function onFollowCameraToggle() {
-				carModel.position.copy( origin );
-			}
-
 			function update() {
 				var delta = clock.getDelta();
 				if ( carModel ) {
@@ -292,24 +283,25 @@
 					// keep the light (and shadow) pointing in the same direction as the car rotates
 					lightHolder.rotation.y = -carModel.rotation.y;
 
-					if ( followCamera.checked ) {
-						carModel.getWorldPosition( cameraTarget );
-						cameraTarget.y = 2.5;
-						cameraTarget.z += distance;
+					carModel.getWorldPosition( cameraTarget );
+					cameraTarget.y = 2.5;
+					cameraTarget.z += distance;
 
-						camera.position.lerp( cameraTarget, delta * damping );
+					camera.position.lerp( cameraTarget, delta * damping );
 
-					}
 					camera.lookAt( carModel.position );
+					// camera.position.x=carModel.position.x;
+					// camera.position.y=carModel.position.y+ 1.5;
+					// camera.position.z=carModel.position.z+1.5;
 				}
 				stats.update();
 			}
 
 			function resetPosition() {
-				if ( carModel.position.distanceTo( origin ) > 200 ) {
-					carModel.position.copy( origin );
-					car.speed = 0;
-				}
+				// if ( carModel.position.distanceTo( origin ) > 200 ) {
+				// 	carModel.position.copy( origin );
+				// 	car.speed = 0;
+				// }
 			}
 
 			init();
