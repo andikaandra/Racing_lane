@@ -69,7 +69,7 @@
 
 		<script src="js/loaders/DRACOLoader.js"></script>
 		<script src="js/loaders/GLTFLoader.js"></script>
-
+		<script src="js/libs/dat.gui.min.js"></script>
 		<script src="js/Car.js"></script>
 		<script src="https://cdn.rawgit.com/Mikhus/canvas-gauges/gh-pages/download/2.1.5/all/gauge.min.js"></script> 
 		<script src="js/WebGL.js"></script>
@@ -162,11 +162,37 @@
 				initMaterials();
 				initMaterialSelectionMenus();
 
+				var params = {
+					Body: function () {
+
+
+					},
+					Rim: function () {
+
+
+					},
+					Glass: function () {
+
+
+					},
+					Refraction: false
+				};
+
+				var gui = new dat.GUI();
+				gui.add( params, 'Body', [ 'orange', 'blue', 'red', 'black', 'white', 'metallic' ] );
+				gui.add( params, 'Rim', [ 'orange', 'blue', 'red', 'black', 'white', 'metallic' ] );
+				gui.add( params, 'Glass', [ 'blue', 'smoked', 'blue' ] );
+				gui.open();
+
 				window.addEventListener( 'resize', onWindowResize, false );
 				window.addEventListener( 'keyup', function(e){
 					if (e.keyCode==86) {
 						modeTPS=!modeTPS;
+					}
+					else if (e.keyCode==80) {
+						console.log("p");
 					}}
+
 				);
 
 				renderer.setAnimationLoop( function() {

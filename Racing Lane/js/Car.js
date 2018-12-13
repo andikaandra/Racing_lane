@@ -45,7 +45,7 @@ THREE.Car = ( function ( ) {
 			frWheel: 'wheel_fr',
 			rlWheel: 'wheel_rl',
 			rrWheel: 'wheel_rr',
-			steeringWheel: 'steering_wheel', // set to null to disable
+			steeringWheel: 'steering_wheel',
 		};
 
 		// km/hr
@@ -63,7 +63,7 @@ THREE.Car = ( function ( ) {
 		deceleration = this.acceleration * 2;
 
 		// multiplied with deceleration, so breaking deceleration = ( acceleration * 2 * brakePower ) m/s
-		this.brakePower = brakePower || 10;
+		this.brakePower = brakePower || 5;
 
 		// exposed so that a user can use this for various effect, e.g blur
 		this.speed = 0;
@@ -137,7 +137,12 @@ THREE.Car = ( function ( ) {
 			if ( controls.brake ) brakingDeceleration = this.brakePower;
 
 			if ( controls.moveForward ) {
-				this.speed = THREE.Math.clamp( this.speed + delta * this.acceleration, maxSpeedReverse, this.maxSpeed );
+				if (this.speed>0.67*this.maxSpeed) {
+					this.speed = THREE.Math.clamp( this.speed + delta * (this.acceleration/2), maxSpeedReverse, this.maxSpeed );					
+				}
+				else{
+					this.speed = THREE.Math.clamp( this.speed + delta * this.acceleration, maxSpeedReverse, this.maxSpeed );					
+				}
 				acceleration = THREE.Math.clamp( acceleration + delta, - 1, 1 );
 			}
 
