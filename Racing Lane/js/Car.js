@@ -57,7 +57,7 @@ THREE.Car = ( function ( ) {
 		accelerationReverse = this.acceleration * 0.5;
 
 		// metres
-		this.turningRadius = turningRadius || 6;
+		this.turningRadius = turningRadius || 4.5;
 
 		// m/s
 		deceleration = this.acceleration * 2;

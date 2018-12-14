@@ -67,6 +67,9 @@
 
 		<script src="js/loaders/DRACOLoader.js"></script>
 		<script src="js/loaders/GLTFLoader.js"></script>
+		<script src="js/loaders/OBJLoader.js"></script>
+		<script src="js/loaders/DDSLoader.js"></script>
+		<script src="js/loaders/MTLLoader.js"></script>
 		<script src="js/libs/dat.gui.min.js"></script>
 		<script src="js/Car.js"></script>
 		<script src="https://cdn.rawgit.com/Mikhus/canvas-gauges/gh-pages/download/2.1.5/all/gauge.min.js"></script> 
@@ -111,7 +114,7 @@
 				scene.background = envMap;
 
 				var ground = new THREE.Mesh(
-					new THREE.PlaneBufferGeometry( 2400, 2400 ),
+					new THREE.PlaneBufferGeometry( 400, 400 ),
 					new THREE.ShadowMaterial( { color: 0x000000, opacity: 0.15, depthWrite: false }
 				) );
 				ground.rotation.x = - Math.PI / 2;
@@ -160,6 +163,7 @@
 
 				initCar();
 				initMaterials();
+				initTrack();
 
 				var gui = new dat.GUI();
 				gui.add( params, 'Body', [ 'orange', 'blue', 'red', 'black', 'white', 'metallic' ] ).onChange( function ( value ) {
@@ -314,6 +318,35 @@
 
 			}
 
+			var onProgress = function ( xhr ) {
+				if ( xhr.lengthComputable ) {
+					var percentComplete = xhr.loaded / xhr.total * 100;
+					console.log( Math.round( percentComplete, 2 ) + '% downloaded' );
+				}
+			};
+
+			var onError = function () { };
+
+			function initTrack() {
+				THREE.Loader.Handlers.add( /\.dds$/i, new THREE.DDSLoader() );
+
+				new THREE.MTLLoader()
+					.setPath( 'models/obj/' )
+					.load( 'track.mtl', function ( materials ) {
+
+						materials.preload();
+
+						new THREE.OBJLoader()
+							.setMaterials( materials )
+							.setPath( 'models/obj/' )
+							.load( 'track.obj', function ( object ) {
+								object.scale.set(10,10,10);
+								scene.add( object );
+
+							}, onProgress, onError );
+
+					} );
+			}
 
 			function onWindowResize() {
 				camera.aspect = window.innerWidth / window.innerHeight;
@@ -339,8 +372,9 @@
 						camera.position.z = 7.5;
 					}
 					else{
-						camera.position.y = 1.5;
-						camera.position.z = 2.5;
+						camera.position.y = 1.1;
+						camera.position.z = 0.35;
+						camera.position.x = -0.3;
 					}
 				}
 			}
