@@ -31,9 +31,7 @@
 
 	<body>
 		<div id="info">
-			<span>Body: <select id="body-mat"></select></span>
-			<span>Rims / Trim: <select id="rim-mat"></select></span>
-			<span>Glass: <select id="glass-mat"></select></span>
+			<span></span>
 		</div>
 		<div id="gauges">		
 			<canvas id="gauge" data-type="radial-gauge"
@@ -81,15 +79,11 @@
 
 			var camera, scene, renderer, carModel, materialsLib, envMap;
 
-			var bodyMatSelect = document.getElementById( 'body-mat' );
-			var rimMatSelect = document.getElementById( 'rim-mat' );
-			var glassMatSelect = document.getElementById( 'glass-mat' );
-
 			var lightHolder = new THREE.Group();
 			var clock = new THREE.Clock();
 			var car = new THREE.Car();
 			car.turningRadius = 75;
-
+			var params;
 			var carParts = {
 				body: [],
 				rims:[],
@@ -108,7 +102,7 @@
 				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 200 );
 
 				scene = new THREE.Scene();
-				scene.fog = new THREE.Fog( 0xd7cbb1, 1, 80 );
+				scene.fog = new THREE.Fog( 0xd7cbb1, 1, 200 );
 
 				envMap = new THREE.CubeTextureLoader()
 					.setPath( 'textures/cube/skyboxsun25deg/')
@@ -124,6 +118,12 @@
 				ground.receiveShadow = true;
 				ground.renderOrder = 1;
 				scene.add( ground );
+
+				params = {
+					Body: 'orange',
+					Rim: 'orange',
+					Glass: 'clear'
+				};
 
 				var grid = new THREE.GridHelper( 400, 40, 0x000000, 0x000000 );
 				grid.material.opacity = 0.2;
@@ -160,28 +160,62 @@
 
 				initCar();
 				initMaterials();
-				initMaterialSelectionMenus();
-
-				var params = {
-					Body: function () {
-
-
-					},
-					Rim: function () {
-
-
-					},
-					Glass: function () {
-
-
-					},
-					Refraction: false
-				};
 
 				var gui = new dat.GUI();
-				gui.add( params, 'Body', [ 'orange', 'blue', 'red', 'black', 'white', 'metallic' ] );
-				gui.add( params, 'Rim', [ 'orange', 'blue', 'red', 'black', 'white', 'metallic' ] );
-				gui.add( params, 'Glass', [ 'blue', 'smoked', 'blue' ] );
+				gui.add( params, 'Body', [ 'orange', 'blue', 'red', 'black', 'white', 'metallic' ] ).onChange( function ( value ) {
+					var index;
+					switch (value) {
+						case 'orange': index=0; 
+							break;
+						case 'blue': index=1; 
+							break;
+						case 'red': index=2; 
+							break;
+						case 'black': index=3; 
+							break;
+						case 'white': index=4; 
+							break;
+						case 'metallic': index=5; 
+							break;
+					}
+					var bodyMat = materialsLib.main[index];
+					carParts.body.forEach( function ( part ) { part.material = bodyMat; } );
+
+				} );
+				gui.add( params, 'Rim', [ 'orange', 'blue', 'red', 'black', 'white', 'metallic' ] ).onChange( function ( value ) {
+					var index;
+					switch (value) {
+						case 'orange': index=0; 
+							break;
+						case 'blue': index=1; 
+							break;
+						case 'red': index=2; 
+							break;
+						case 'black': index=3; 
+							break;
+						case 'white': index=4; 
+							break;
+						case 'metallic': index=5; 
+							break;
+					}
+					var rimMat = materialsLib.main[index];
+					carParts.rims.forEach( function ( part ) { part.material = rimMat; } );
+
+				} );
+				gui.add( params, 'Glass', [ 'clear', 'smoked', 'blue' ] ).onChange( function ( value ) {
+					var index;
+					switch (value) {
+						case 'clear': index=0; 
+							break;
+						case 'smoked': index=1; 
+							break;
+						case 'blue': index=2; 
+							break;
+					}
+					var glassMat = materialsLib.glass[index];
+					carParts.glass.forEach( function ( part ) { part.material = glassMat; } );
+
+				} );
 				gui.open();
 
 				window.addEventListener( 'resize', onWindowResize, false );
@@ -251,8 +285,10 @@
 						carModel.getObjectByName( 'glass' ),
 					 );
 					carModel.add(camera);
-					updateMaterials();
 
+					carParts.body.forEach( function ( part ) { part.material = materialsLib.main[0]; } );
+					carParts.rims.forEach( function ( part ) { part.material = materialsLib.main[0]; } );
+					carParts.glass.forEach( function ( part ) { part.material = materialsLib.glass[0]; } );
 				});
 
 			}
@@ -278,42 +314,6 @@
 
 			}
 
-			function initMaterialSelectionMenus() {
-				function addOption( name, menu ) {
-					var option = document.createElement( 'option' );
-					option.text = name;
-					option.value = name;
-					menu.add( option );
-				}
-
-				materialsLib.main.forEach( function( material ) {
-					addOption( material.name, bodyMatSelect );
-					addOption( material.name, rimMatSelect );
-				} );
-
-				materialsLib.glass.forEach( function( material ) {
-					addOption( material.name, glassMatSelect );
-				} );
-
-				bodyMatSelect.selectedIndex = 2;
-				rimMatSelect.selectedIndex = 4;
-				glassMatSelect.selectedIndex = 0;
-
-				bodyMatSelect.addEventListener( 'change', updateMaterials );
-				rimMatSelect.addEventListener( 'change', updateMaterials );
-				glassMatSelect.addEventListener( 'change', updateMaterials );
-			}
-
-			// set materials to the current values of the selection menus
-			function updateMaterials() {
-				var bodyMat = materialsLib.main[ bodyMatSelect.selectedIndex ];
-				var rimMat = materialsLib.main[ rimMatSelect.selectedIndex ];
-				var glassMat = materialsLib.glass[ glassMatSelect.selectedIndex ];
-
-				carParts.body.forEach( function ( part ) { part.material = bodyMat; } );
-				carParts.rims.forEach( function ( part ) { part.material = rimMat; } );
-				carParts.glass.forEach( function ( part ) { part.material = glassMat; } );
-			}
 
 			function onWindowResize() {
 				camera.aspect = window.innerWidth / window.innerHeight;
@@ -346,9 +346,8 @@
 			}
 
 			setInterval(function(){ 
-				// console.log(car.speed);
-				document.getElementById("gauge").setAttribute('data-value', Math.floor(car.speed*6));
-			}, 100);
+				document.getElementById("gauge").setAttribute('data-value', Math.floor(car.speed*5));
+			}, 25);
 
 			function resetPosition() {
 				// if ( carModel.position.distanceTo( origin ) > 200 ) {
