@@ -1,17 +1,5 @@
-/**
- * @author alteredq / http://alteredqualia.com/
- * @author Lewy Blue https://github.com/looeee
- *
- * The model is expected to follow real world car proportions. You can try unusual car types
- * but your results may be unexpected. Scaled models are also not supported.
- *
- * Defaults are rough estimates for a real world scale car model
- *
- */
-
 THREE.Car = ( function ( ) {
 
-	// private variables
 	var steeringWheelSpeed = 1.5;
 	var maxSteeringRotation = 0.6;
 
@@ -19,7 +7,7 @@ THREE.Car = ( function ( ) {
 
 	var maxSpeedReverse, accelerationReverse, deceleration;
 
-	var controlKeys = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40, BRAKE: 32 };
+	var controlKeys = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40, BRAKE: 32, LEFT1: 65, UP1: 87, RIGHT1: 68, DOWN1: 83 };
 
 	var wheelOrientation = 0;
 	var carOrientation = 0;
@@ -42,17 +30,14 @@ THREE.Car = ( function ( ) {
 	var loaded = false;
 
 	var controls = {
-
 		brake: false,
 		moveForward: false,
 		moveBackward: false,
 		moveLeft: false,
 		moveRight: false
-
 	};
 
 	function Car( maxSpeed, acceleration, brakePower, turningRadius, keys ) {
-
 		this.enabled = true;
 
 		this.elemNames = {
@@ -60,11 +45,11 @@ THREE.Car = ( function ( ) {
 			frWheel: 'wheel_fr',
 			rlWheel: 'wheel_rl',
 			rrWheel: 'wheel_rr',
-			steeringWheel: 'steering_wheel', // set to null to disable
+			steeringWheel: 'steering_wheel',
 		};
 
 		// km/hr
-		this.maxSpeed = maxSpeed || 50;
+		this.maxSpeed = maxSpeed || 30;
 		maxSpeedReverse = - this.maxSpeed * 0.25;
 
 		// m/s
@@ -78,7 +63,7 @@ THREE.Car = ( function ( ) {
 		deceleration = this.acceleration * 2;
 
 		// multiplied with deceleration, so breaking deceleration = ( acceleration * 2 * brakePower ) m/s
-		this.brakePower = brakePower || 10;
+		this.brakePower = brakePower || 5;
 
 		// exposed so that a user can use this for various effect, e.g blur
 		this.speed = 0;
@@ -93,17 +78,13 @@ THREE.Car = ( function ( ) {
 
 		document.addEventListener( 'keydown', this.onKeyDown, false );
 		document.addEventListener( 'keyup', this.onKeyUp, false );
-
 	}
 
 	Car.prototype = {
-
 		constructor: Car,
 
 		onKeyDown: function ( event ) {
-
 			switch ( event.keyCode ) {
-
 				case controlKeys.BRAKE:
 					controls.brake = true;
 					controls.moveForward = false;
@@ -111,44 +92,44 @@ THREE.Car = ( function ( ) {
 					break;
 
 				case controlKeys.UP: controls.moveForward = true; break;
+				case controlKeys.UP1: controls.moveForward = true; break;
 
 				case controlKeys.DOWN: controls.moveBackward = true; break;
+				case controlKeys.DOWN1: controls.moveBackward = true; break;
 
 				case controlKeys.LEFT: controls.moveLeft = true; break;
+				case controlKeys.LEFT1: controls.moveLeft = true; break;
 
 				case controlKeys.RIGHT: controls.moveRight = true; break;
+				case controlKeys.RIGHT1: controls.moveRight = true; break;
 
 			}
-
 		},
 
 		onKeyUp: function ( event ) {
-
 			switch ( event.keyCode ) {
-
 				case controlKeys.BRAKE: controls.brake = false; break;
 
 				case controlKeys.UP: controls.moveForward = false; break;
+				case controlKeys.UP1: controls.moveForward = false; break;
 
 				case controlKeys.DOWN: controls.moveBackward = false; break;
+				case controlKeys.DOWN1: controls.moveBackward = false; break;
 
 				case controlKeys.LEFT: controls.moveLeft = false; break;
+				case controlKeys.LEFT1: controls.moveLeft = false; break;
 
 				case controlKeys.RIGHT: controls.moveRight = false; break;
-
+				case controlKeys.RIGHT1: controls.moveRight = false; break;
 			}
-
 		},
 
 		dispose: function () {
-
 			document.removeEventListener( 'keydown', this.onKeyDown, false );
 			document.removeEventListener( 'keyup', this.onKeyUp, false );
-
 		},
 
 		update: function ( delta ) {
-
 			if ( ! loaded || ! this.enabled ) return;
 
 			var brakingDeceleration = 1;
@@ -156,65 +137,50 @@ THREE.Car = ( function ( ) {
 			if ( controls.brake ) brakingDeceleration = this.brakePower;
 
 			if ( controls.moveForward ) {
-
-				this.speed = THREE.Math.clamp( this.speed + delta * this.acceleration, maxSpeedReverse, this.maxSpeed );
+				if (this.speed>0.67*this.maxSpeed) {
+					this.speed = THREE.Math.clamp( this.speed + delta * (this.acceleration/2), maxSpeedReverse, this.maxSpeed );					
+				}
+				else{
+					this.speed = THREE.Math.clamp( this.speed + delta * this.acceleration, maxSpeedReverse, this.maxSpeed );					
+				}
 				acceleration = THREE.Math.clamp( acceleration + delta, - 1, 1 );
-
 			}
 
 			if ( controls.moveBackward ) {
-
 				this.speed = THREE.Math.clamp( this.speed - delta * accelerationReverse, maxSpeedReverse, this.maxSpeed );
 				acceleration = THREE.Math.clamp( acceleration - delta, - 1, 1 );
-
 			}
 
 			if ( controls.moveLeft ) {
-
 				wheelOrientation = THREE.Math.clamp( wheelOrientation + delta * steeringWheelSpeed, - maxSteeringRotation, maxSteeringRotation );
-
 			}
 
 			if ( controls.moveRight ) {
-
 				wheelOrientation = THREE.Math.clamp( wheelOrientation - delta * steeringWheelSpeed, - maxSteeringRotation, maxSteeringRotation );
-
 			}
 
 			// this.speed decay
 			if ( ! ( controls.moveForward || controls.moveBackward ) ) {
-
 				if ( this.speed > 0 ) {
-
 					var k = exponentialEaseOut( this.speed / this.maxSpeed );
 
 					this.speed = THREE.Math.clamp( this.speed - k * delta * deceleration * brakingDeceleration, 0, this.maxSpeed );
 					acceleration = THREE.Math.clamp( acceleration - k * delta, 0, 1 );
-
 				} else {
-
 					var k = exponentialEaseOut( this.speed / maxSpeedReverse );
 
 					this.speed = THREE.Math.clamp( this.speed + k * delta * accelerationReverse * brakingDeceleration, maxSpeedReverse, 0 );
 					acceleration = THREE.Math.clamp( acceleration + k * delta, - 1, 0 );
-
 				}
-
 			}
 
 			// steering decay
 			if ( ! ( controls.moveLeft || controls.moveRight ) ) {
-
 				if ( wheelOrientation > 0 ) {
-
 					wheelOrientation = THREE.Math.clamp( wheelOrientation - delta * steeringWheelSpeed, 0, maxSteeringRotation );
-
 				} else {
-
 					wheelOrientation = THREE.Math.clamp( wheelOrientation + delta * steeringWheelSpeed, - maxSteeringRotation, 0 );
-
 				}
-
 			}
 
 			var forwardDelta = - this.speed * delta;
@@ -243,11 +209,9 @@ THREE.Car = ( function ( ) {
 			frontRightWheelRoot.rotation[ this.wheelTurnAxis ] = wheelOrientation;
 
 			steeringWheel.rotation[ this.steeringWheelTurnAxis ] = -wheelOrientation * 6;
-
 		},
 
 		setModel: function ( model, elemNames ) {
-
 			if ( elemNames ) this.elemNames = elemNames;
 
 			root = model;
@@ -256,11 +220,9 @@ THREE.Car = ( function ( ) {
 			this.computeDimensions();
 
 			loaded = true;
-
 		},
 
 		setupWheels: function () {
-
 			frontLeftWheelRoot = root.getObjectByName( this.elemNames.flWheel );
 			frontRightWheelRoot = root.getObjectByName( this.elemNames.frWheel );
 			backLeftWheel = root.getObjectByName( this.elemNames.rlWheel );
@@ -273,11 +235,9 @@ THREE.Car = ( function ( ) {
 
 			frontLeftWheelRoot.add( frontLeftWheel );
 			frontRightWheelRoot.add( frontRightWheel );
-
 		},
 
 		computeDimensions: function () {
-
 			var bb = new THREE.Box3().setFromObject( frontLeftWheelRoot );
 
 			var size = new THREE.Vector3();
@@ -289,15 +249,12 @@ THREE.Car = ( function ( ) {
 
 			size = bb.getSize( size );
 			length = Math.max( size.x, size.y, size.z );
-
 		}
 
 	};
 
 	function exponentialEaseOut( k ) {
-
 		return k === 1 ? 1 : - Math.pow( 2, - 10 * k ) + 1;
-
 	}
 
 	return Car;
