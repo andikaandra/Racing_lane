@@ -129,7 +129,7 @@ THREE.Car = ( function ( ) {
 			document.removeEventListener( 'keyup', this.onKeyUp, false );
 		},
 
-		update: function ( delta ) {
+		update: function ( delta, state ) {
 			if ( ! loaded || ! this.enabled ) return;
 
 			var brakingDeceleration = 1;
@@ -177,22 +177,27 @@ THREE.Car = ( function ( ) {
 			// steering decay
 			if ( ! ( controls.moveLeft || controls.moveRight ) ) {
 				if ( wheelOrientation > 0 ) {
-					wheelOrientation = THREE.Math.clamp( wheelOrientation - delta * steeringWheelSpeed, 0, maxSteeringRotation );
+					wheelOrientation = THREE.Math.clamp( wheelOrientation - delta * steeringWheelSpeed*1.5, 0, maxSteeringRotation );
 				} else {
-					wheelOrientation = THREE.Math.clamp( wheelOrientation + delta * steeringWheelSpeed, - maxSteeringRotation, 0 );
+					wheelOrientation = THREE.Math.clamp( wheelOrientation + delta * steeringWheelSpeed*1.5, - maxSteeringRotation, 0 );
 				}
 			}
 
 			var forwardDelta = - this.speed * delta;
 
 			carOrientation -= ( forwardDelta * this.turningRadius * 0.02 ) * wheelOrientation;
-
 			// movement of car
 			root.position.x += Math.sin( carOrientation ) * forwardDelta * length;
 			root.position.z += Math.cos( carOrientation ) * forwardDelta * length;
 
 			// angle of car
-			root.rotation.y = carOrientation;
+			if (state==0) {
+				carOrientation=-Math.PI/2;
+				root.rotation.y = carOrientation;
+			}
+			else{
+				root.rotation.y = carOrientation;
+			}
 
 			// wheels rolling
 			var angularSpeedRatio = - 2 / wheelDiameter;

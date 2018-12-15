@@ -26,6 +26,14 @@
 				text-align: left;
 				z-index: 100;
 			}
+			#clock {
+				display: none;
+				position: absolute;
+				top: 5%;
+				width: 100%;
+				text-align: center;
+				z-index: 100;
+			}
 		</style>
 	</head>
 
@@ -61,6 +69,8 @@
 			    data-animation-rule="linear"
 			></canvas>
 		</div>
+		<div class="clock" id="clock" style="margin:2em;"></div>
+<!-- 		<div class="message"></div> -->
 		<div id="container"></div>
 
 		<script src="../build/three.js"></script>
@@ -72,6 +82,9 @@
 		<script src="js/loaders/MTLLoader.js"></script>
 		<script src="js/libs/dat.gui.min.js"></script>
 		<script src="js/Car.js"></script>
+		<link rel="stylesheet" href="../FlipClock-master/compiled/flipclock.css">
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script src="../FlipClock-master/compiled/flipclock.js"></script>
 		<script src="https://cdn.rawgit.com/Mikhus/canvas-gauges/gh-pages/download/2.1.5/all/gauge.min.js"></script> 
 		<script src="js/WebGL.js"></script>
 		<script>
@@ -81,7 +94,7 @@
 			}
 
 			var camera, scene, renderer, carModel, materialsLib, envMap;
-
+			var clocks;
 			var lightHolder = new THREE.Group();
 			var clock = new THREE.Clock();
 			var car = new THREE.Car();
@@ -93,6 +106,7 @@
 				glass: [],
 			};
 			var modeTPS = 1;
+			var startCar = 0;
 			var damping = 5.0;
 			var distance = 5;
 			var cameraTarget = new THREE.Vector3();
@@ -229,9 +243,15 @@
 					}
 					else if (e.keyCode==80) {
 						console.log("p");
-					}}
-
-				);
+					}
+					else if (e.keyCode==13) {
+						console.log(carModel.position);
+						startCar=!startCar;
+						$("#clock").css("display", "block");
+						clocks.start();
+						carModel.position.set(14.000842061352705, 0, -70.16754624860691);
+					}
+				});
 
 				renderer.setAnimationLoop( function() {
 					update();
@@ -273,6 +293,8 @@
 					shadow.renderOrder = 2;
 					carModel.add( shadow );
 
+					carModel.position.x=12.580246725237163;
+					carModel.position.z=-7.321239496800439;
 					scene.add( carModel );
 
 					// car parts for material selection
@@ -340,7 +362,9 @@
 							.setMaterials( materials )
 							.setPath( 'models/obj/' )
 							.load( 'track.obj', function ( object ) {
-								object.scale.set(10,10,10);
+								object.scale.set(12,12,12);
+								object.add( lightHolder );
+								object.rotation.y= -Math.PI /2;
 								scene.add( object );
 
 							}, onProgress, onError );
@@ -358,7 +382,14 @@
 			function update() {
 				var delta = clock.getDelta();
 				if ( carModel ) {
-					car.update( delta / 3 );
+					if (startCar) {
+						car.speed=0;
+						car.update( delta / 3, 0 );
+						startCar=!startCar;
+					}
+					else{
+						car.update( delta / 3, 1 );
+					}
 					resetPosition();
 					// keep the light (and shadow) pointing in the same direction as the car rotates
 					lightHolder.rotation.y = -carModel.rotation.y;
@@ -392,7 +423,22 @@
 
 			init();
 
-		</script>
+			$(document).ready(function() {
 
+				clocks = $('.clock').FlipClock({
+			        clockFace: 'MinuteCounter',
+			        autoStart: true,
+			        callbacks: {
+			        	stop: function() {
+			        		$('.message').html('The clock has stopped!')
+			        	}
+			        }
+			    });
+
+			    clocks.setCountdown(true);
+			    clocks.start();
+
+			});
+		</script>
 	</body>
 </html>
