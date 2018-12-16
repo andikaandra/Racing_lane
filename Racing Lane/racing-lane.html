@@ -92,9 +92,8 @@
 			if ( WEBGL.isWebGLAvailable() === false ) {
 				document.body.appendChild( WEBGL.getWebGLErrorMessage() );
 			}
-
-			var camera, scene, renderer, carModel, materialsLib, envMap;
 			var clocks;
+			var camera, scene, renderer, carModel, materialsLib, envMap;
 			var lightHolder = new THREE.Group();
 			var clock = new THREE.Clock();
 			var car = new THREE.Car();
@@ -247,8 +246,8 @@
 					else if (e.keyCode==13) {
 						console.log(carModel.position);
 						startCar=!startCar;
+				    	clocks.start();
 						$("#clock").css("display", "block");
-						clocks.start();
 						carModel.position.set(14.000842061352705, 0, -70.16754624860691);
 					}
 				});
@@ -427,16 +426,8 @@
 
 				clocks = $('.clock').FlipClock({
 			        clockFace: 'MinuteCounter',
-			        autoStart: true,
-			        callbacks: {
-			        	stop: function() {
-			        		$('.message').html('The clock has stopped!')
-			        	}
-			        }
+			        autoStart: false,
 			    });
-
-			    clocks.setCountdown(true);
-			    clocks.start();
 
 			});
 		</script>
