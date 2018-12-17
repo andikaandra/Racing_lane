@@ -82,7 +82,23 @@ THREE.Car = ( function ( ) {
 
 	Car.prototype = {
 		constructor: Car,
+		onKeyUp: function ( event ) {
+			switch ( event.keyCode ) {
+				case controlKeys.BRAKE: controls.brake = false; break;
 
+				case controlKeys.UP: controls.moveForward = false; break;
+				case controlKeys.UP1: controls.moveForward = false; break;
+
+				case controlKeys.DOWN: controls.moveBackward = false; break;
+				case controlKeys.DOWN1: controls.moveBackward = false; break;
+
+				case controlKeys.LEFT: controls.moveLeft = false; break;
+				case controlKeys.LEFT1: controls.moveLeft = false; break;
+
+				case controlKeys.RIGHT: controls.moveRight = false; break;
+				case controlKeys.RIGHT1: controls.moveRight = false; break;
+			}
+		},
 		onKeyDown: function ( event ) {
 			switch ( event.keyCode ) {
 				case controlKeys.BRAKE:
@@ -106,23 +122,7 @@ THREE.Car = ( function ( ) {
 			}
 		},
 
-		onKeyUp: function ( event ) {
-			switch ( event.keyCode ) {
-				case controlKeys.BRAKE: controls.brake = false; break;
-
-				case controlKeys.UP: controls.moveForward = false; break;
-				case controlKeys.UP1: controls.moveForward = false; break;
-
-				case controlKeys.DOWN: controls.moveBackward = false; break;
-				case controlKeys.DOWN1: controls.moveBackward = false; break;
-
-				case controlKeys.LEFT: controls.moveLeft = false; break;
-				case controlKeys.LEFT1: controls.moveLeft = false; break;
-
-				case controlKeys.RIGHT: controls.moveRight = false; break;
-				case controlKeys.RIGHT1: controls.moveRight = false; break;
-			}
-		},
+	 
 
 		dispose: function () {
 			document.removeEventListener( 'keydown', this.onKeyDown, false );
@@ -145,15 +145,17 @@ THREE.Car = ( function ( ) {
 				}
 				acceleration = THREE.Math.clamp( acceleration + delta, - 1, 1 );
 			}
+			
+			if ( controls.moveLeft ) {
+				wheelOrientation = THREE.Math.clamp( wheelOrientation + delta * steeringWheelSpeed, - maxSteeringRotation, maxSteeringRotation );
+			}
 
 			if ( controls.moveBackward ) {
 				this.speed = THREE.Math.clamp( this.speed - delta * accelerationReverse, maxSpeedReverse, this.maxSpeed );
 				acceleration = THREE.Math.clamp( acceleration - delta, - 1, 1 );
 			}
 
-			if ( controls.moveLeft ) {
-				wheelOrientation = THREE.Math.clamp( wheelOrientation + delta * steeringWheelSpeed, - maxSteeringRotation, maxSteeringRotation );
-			}
+			 
 
 			if ( controls.moveRight ) {
 				wheelOrientation = THREE.Math.clamp( wheelOrientation - delta * steeringWheelSpeed, - maxSteeringRotation, maxSteeringRotation );
