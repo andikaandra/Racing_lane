@@ -75,6 +75,7 @@
 	</head>
 
 	<body>
+		<p style="position:absolute; font-size:40px;">Lap <span id="lap">1</span></p>
 		<div id="blocker">
 			<div id="instructions">
 				<span style="font-size:40px">Click to play</span>
@@ -130,7 +131,7 @@
 		<script src="https://cdn.rawgit.com/Mikhus/canvas-gauges/gh-pages/download/2.1.5/all/gauge.min.js"></script> 
 		<script src="js/WebGL.js"></script>
 		<script>
-
+			
 			if ( WEBGL.isWebGLAvailable() === false ) {
 				document.body.appendChild( WEBGL.getWebGLErrorMessage() );
 			}
@@ -406,15 +407,23 @@
 			};
 
 			var onError = function () { };
-
+			var collidableMeshList = [];
 			function initTrack() {
+				var wallGeometry = new THREE.CubeGeometry( 15, 15, 10, 1, 1, 1 );
+				var wallMaterial = new THREE.MeshBasicMaterial( {color: 0xffffff} );
+				wallMaterial.transparent =true;
+				wallMaterial.opacity = 0;
+				var wall = new THREE.Mesh(wallGeometry, wallMaterial);
+				wall.position.set(15.000842061352705, 0, -70.16754624860691);
+				scene.add(wall);
+				collidableMeshList.push(wall);
 				THREE.Loader.Handlers.add( /\.dds$/i, new THREE.DDSLoader() );
 
-				new THREE.MTLLoader().setPath( 'models/obj/' ).load( 'track4d.mtl', function ( materials ) {
+				new THREE.MTLLoader().setPath( 'models/obj/' ).load( 'track2d.mtl', function ( materials ) {
 
 						materials.preload();
 
-						new THREE.OBJLoader().setMaterials( materials ).setPath( 'models/obj/' ).load( 'track4d.obj', function ( object ) {
+						new THREE.OBJLoader().setMaterials( materials ).setPath( 'models/obj/' ).load( 'track2d.obj', function ( object ) {
 								object.scale.set(12,12,12);
 								object.add( lightHolder );
 								object.rotation.y= -Math.PI /2;
@@ -435,9 +444,11 @@
 
 				renderer.setSize( window.innerWidth, window.innerHeight );
 			}
-
+			var lastposition = 0;
+			var lapCount = 0;
 			function update() {
 				var delta = clock.getDelta();
+
 				if ( carModel ) {
 					if (startCar) {
 						car.speed=0;
@@ -448,7 +459,24 @@
 						car.update( delta / 3, 1 );
 					}
 					resetPosition();
-
+					var directionVector = carModel.getWorldDirection(cameraTarget);
+					var ray = new THREE.Raycaster( carModel.getWorldPosition( cameraTarget ), directionVector.clone().normalize() );
+					var collisionResults = ray.intersectObjects( collidableMeshList );
+					if ( collisionResults.length > 0 && collisionResults[0].distance < 8 ) 
+					{
+						console.log("Collision");
+						if (lastposition != 1 )
+						{
+						 lapCount = lapCount+1;
+						 lastposition = 1;
+						}
+						document.getElementById('lap').innerHTML = lapCount.toString();
+						console.log("Lap Count:"+ lapCount.toString());
+					}
+					else{
+						lastposition =0;
+					}
+					
 					lightHolder.rotation.y = -carModel.rotation.y;
 
 					carModel.getWorldPosition( cameraTarget );
