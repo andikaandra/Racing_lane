@@ -258,6 +258,15 @@
 				} );
 
 			}
+
+			//WIP
+			function goingUp(height, length){
+			var r = 2;//assumsi
+			var deltaS = Math.sqrt((height*height)+(length*length));
+			var radiate = deltaS/r ;
+			carModel.rotateX(radiate)
+			}
+			
 			function initCar() {
 
 				THREE.DRACOLoader.setDecoderPath( 'js/libs/draco/gltf/' );

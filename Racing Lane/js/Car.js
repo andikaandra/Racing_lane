@@ -47,7 +47,7 @@ THREE.Car = ( function ( ) {
 			rrWheel: 'wheel_rr',
 			steeringWheel: 'steering_wheel',
 		};
-
+		
 		// km/hr
 		this.maxSpeed = maxSpeed || 30;
 		maxSpeedReverse = - this.maxSpeed * 0.25;
@@ -256,10 +256,14 @@ THREE.Car = ( function ( ) {
 
 			size = bb.getSize( size );
 			length = Math.max( size.x, size.y, size.z );
-		}
+		},
+
+		
 
 	};
 
+	
+	
 	function exponentialEaseOut( k ) {
 		return k === 1 ? 1 : - Math.pow( 2, - 10 * k ) + 1;
 	}
