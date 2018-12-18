@@ -79,7 +79,7 @@
 			<div id="instructions">
 				<span style="font-size:40px">Click to play</span>
 				<br />
-				(W, A, S, D / Arrow = Move, V = Change Camera, ENTER = Start Race)
+				(W, A, S, D / Arrow = Move, V = Change Camera, SPACE = Brakes ,ENTER = Start Race)
 			</div>
 		</div>
 		<div id="gauges" style="display: none">
@@ -134,6 +134,10 @@
 			if ( WEBGL.isWebGLAvailable() === false ) {
 				document.body.appendChild( WEBGL.getWebGLErrorMessage() );
 			}
+
+			var audio = new Audio('Audio.mp3');
+			audio.play();
+
 			var clocks;
 			var camera, scene, renderer, carModel, materialsLib, envMap;
 			var lightHolder = new THREE.Group();
@@ -237,14 +241,14 @@
 						console.log("p");
 					}
 					else if (e.keyCode==13) {
-						if (true) {
-
+						if (started) {
+							console.log(carModel.position);
+							startCar=!startCar;
+					    	clocks.start();
+							$("#clock").css("display", "block");
+							carModel.position.set(14.000842061352705, 0.25, -70.16754624860691);
+							started=!started;
 						}
-						console.log(carModel.position);
-						startCar=!startCar;
-				    	clocks.start();
-						$("#clock").css("display", "block");
-						carModel.position.set(14.000842061352705, 0, -70.16754624860691);
 					}
 				});
 
@@ -287,10 +291,11 @@
 					carModel.add( shadow );
 
 					carModel.position.x=12.580246725237163;
+					carModel.position.y=0.25;
 					carModel.position.z=-7.321239496800439;
 					scene.add( carModel );
 
-					// car parts for material selection
+
 					carParts.body.push( carModel.getObjectByName( 'body' ) );
 					carParts.rims.push(
 						carModel.getObjectByName( 'rim_fl' ),
