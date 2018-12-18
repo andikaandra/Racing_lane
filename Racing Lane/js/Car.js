@@ -248,10 +248,14 @@ THREE.Car = ( function ( ) {
 
 			size = bb.getSize( size );
 			length = Math.max( size.x, size.y, size.z );
-		}
+		},
+
+		
 
 	};
 
+	
+	
 	function exponentialEaseOut( k ) {
 		return k === 1 ? 1 : - Math.pow( 2, - 10 * k ) + 1;
 	}
