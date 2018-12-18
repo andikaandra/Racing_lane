@@ -75,7 +75,7 @@
 	</head>
 
 	<body>
-		<p style="position:absolute; font-size:40px; color:#4173fa; margin-left: 20px; margin-top: 150px;font-family: helvetica;font-weight: bolder;">Lap <span id="lap">0</span></p>
+		<p style="position:absolute; font-size:40px; color:#4173fa; margin-left: 20px; margin-top: 150px;font-family: helvetica;font-weight: bolder; display: none;" id="lapCounter">Lap <span id="lap">0</span></p>
 		<div id="blocker">
 			<div id="instructions">
 				<span style="font-size:40px">Click to play</span>
@@ -125,6 +125,7 @@
 		<script src="js/libs/dat.gui.min.js"></script>
 		<script src="js/Car.js"></script>
 		<script src="js/vr/WebVR.js"></script>
+		<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 		<link rel="stylesheet" href="../FlipClock-master/compiled/flipclock.css">
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 		<script src="../FlipClock-master/compiled/flipclock.js"></script>
@@ -163,6 +164,7 @@
 			var gauge = document.getElementById( 'gauges' );
 			var instructions = document.getElementById( 'instructions' );
 			var container = document.getElementById( 'container' );
+			var lapCounter = document.getElementById( 'lapCounter' );
 			instructions.addEventListener( 'click', function () {
 				instructions.style.display = 'none';
 				blocker.style.display = 'none';	
@@ -246,8 +248,9 @@
 							console.log(carModel.position);
 							startCar=!startCar;
 							clocks.start();
-							lapCount=1;
+							lapCount=0;
 							$("#clock").css("display", "block");
+							$("#lapCounter").css("display", "block");
 							carModel.position.set(14.000842061352705, 0.25, -70.16754624860691);
 							started=!started;
 						}
@@ -475,6 +478,16 @@
 						{
 						 lapCount = lapCount+1;
 						 lastposition = 1;
+						 if (lapCount==5) {
+						 	car.speed=0;
+						 	startCar=!startCar;
+						 	clocks.stop();
+		              		swal("Congratulation, you had finished RACING LANE ",{
+								closeOnClickOutside: false,
+		              		}).then(function() {
+								window.location.reload(false); 
+							});
+						 }
 						}
 						document.getElementById('lap').innerHTML = lapCount.toString();
 						console.log("Lap Count:"+ lapCount.toString());
