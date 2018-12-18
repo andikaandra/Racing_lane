@@ -4,6 +4,11 @@
 		<title>Racing Lane!</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<meta http-equiv="origin-trial" data-feature="WebVR (For Chrome M62+)" data-expires="2018-09-11" content="AqhFUYKxq/d+E8CDT0fuYRCg8TvlTP52x0Jv7I9t27sLhR30LmcahBRfSwzP89ukjs2+ia99VrrLoRyaFAwJVA0AAABQeyJvcmlnaW4iOiJodHRwczovL3RocmVlanMub3JnOjQ0MyIsImZlYXR1cmUiOiJXZWJWUjEuMU02MiIsImV4cGlyeSI6MTUzNjYyNDAwMH0=">
+		<!-- Origin Trial Token, feature = WebXR Device API (For Chrome M69+), origin = https://threejs.org, expires = 2018-12-02 -->
+		<meta http-equiv="origin-trial" data-feature="WebXR Device API (For Chrome M69+)" data-expires="2018-12-02" content="Ah46myef4Ax/+fcLtkeotXmIqnvun4lg4bYbHVttuJvbsWiE4oacrvroId7hbCEb4/byxFHIO6+uwq4pwr6RfQkAAABTeyJvcmlnaW4iOiJodHRwczovL3RocmVlanMub3JnOjQ0MyIsImZlYXR1cmUiOiJXZWJYUkRldmljZU02OSIsImV4cGlyeSI6MTU0Mzc1ODIyNn0=">
+		<!-- Origin Trial Token, feature = WebXR Gamepad Support, origin = https://threejs.org, expires = 2018-12-02 -->
+		<meta http-equiv="origin-trial" data-feature="WebXR Gamepad Support" data-expires="2018-12-02" content="AqI9LIanbGxr/HoTOsYCUNxG82Vy94NZbjhv83R+bF+5NX2jiZOaf7ny+mFoTUP5wrWpYlPjQ6+HeVas9f1lRwYAAABYeyJvcmlnaW4iOiJodHRwczovL3RocmVlanMub3JnOjQ0MyIsImZlYXR1cmUiOiJXZWJYUkdhbWVwYWRTdXBwb3J0IiwiZXhwaXJ5IjoxNTQzNzU4MjI2fQ==">
 		<style>
 			body {
 				font-family: Monospace;
@@ -11,13 +16,6 @@
 				color: #000;
 				margin: 0px;
 				overflow: hidden;
-			}
-			#info {
-				position: absolute;
-				top: 10px;
-				width: 100%;
-				text-align: center;
-				z-index: 100;
 			}
 			#gauges {
 				position: absolute;
@@ -34,14 +32,55 @@
 				text-align: center;
 				z-index: 100;
 			}
+			#blocker {
+
+				position: absolute;
+
+				width: 100%;
+				height: 100%;
+
+				background-color: rgba(0,0,0,0.5);
+
+			}
+
+			#instructions {
+				width: 100%;
+				height: 100%;
+
+				display: -webkit-box;
+				display: -moz-box;
+				display: box;
+
+				-webkit-box-orient: horizontal;
+				-moz-box-orient: horizontal;
+				box-orient: horizontal;
+
+				-webkit-box-pack: center;
+				-moz-box-pack: center;
+				box-pack: center;
+
+				-webkit-box-align: center;
+				-moz-box-align: center;
+				box-align: center;
+
+				color: #ffffff;
+				text-align: center;
+
+				cursor: pointer;
+			}
+
 		</style>
 	</head>
 
 	<body>
-		<div id="info">
-			<span></span>
+		<div id="blocker">
+			<div id="instructions">
+				<span style="font-size:40px">Click to play</span>
+				<br />
+				(W, A, S, D / Arrow = Move, V = Change Camera, ENTER = Start Race)
+			</div>
 		</div>
-		<div id="gauges">		
+		<div id="gauges" style="display: none">
 			<canvas id="gauge" data-type="radial-gauge"
 			    data-width="200"
 			    data-height="200"
@@ -71,7 +110,7 @@
 		</div>
 		<div class="clock" id="clock" style="margin:2em;"></div>
 <!-- 		<div class="message"></div> -->
-		<div id="container"></div>
+		<div id="container" style="display: none;"></div>
 
 		<script src="../build/three.js"></script>
 
@@ -82,10 +121,10 @@
 		<script src="js/loaders/MTLLoader.js"></script>
 		<script src="js/libs/dat.gui.min.js"></script>
 		<script src="js/Car.js"></script>
+		<script src="js/vr/WebVR.js"></script>
 		<link rel="stylesheet" href="../FlipClock-master/compiled/flipclock.css">
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 		<script src="../FlipClock-master/compiled/flipclock.js"></script>
-		<script src="../cannon.js-master/build/cannon.js"></script>
 		<script src="https://cdn.rawgit.com/Mikhus/canvas-gauges/gh-pages/download/2.1.5/all/gauge.min.js"></script> 
 		<script src="js/WebGL.js"></script>
 		<script>
@@ -105,6 +144,7 @@
 				rims:[],
 				glass: [],
 			};
+			var started=0;
 			var modeTPS = 1;
 			var startCar = 0;
 			var damping = 5.0;
@@ -112,9 +152,20 @@
 			var cameraTarget = new THREE.Vector3();
 			var origin = new THREE.Vector3();
 
-			function init() {
+			var blocker = document.getElementById( 'blocker' );
+			var gauge = document.getElementById( 'gauges' );
+			var instructions = document.getElementById( 'instructions' );
+			var container = document.getElementById( 'container' );
+			instructions.addEventListener( 'click', function () {
+				instructions.style.display = 'none';
+				blocker.style.display = 'none';	
+				container.style.display = 'block';	
+				gauge.style.display = 'block';	
+				started=1;
+				initGUI();
+			}, false );
 
-				var container = document.getElementById( 'container' );
+			function init() {
 
 				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 200 );
 
@@ -142,12 +193,6 @@
 					Glass: 'clear'
 				};
 
-				// var grid = new THREE.GridHelper( 400, 40, 0x000000, 0x000000 );
-				// grid.material.opacity = 0.2;
-				// grid.material.depthWrite = false;
-				// grid.material.transparent = true;
-				// scene.add( grid );
-
 				var hemiLight = new THREE.HemisphereLight( 0x7c849b, 0xd7cbb1, 0.1 );
 				hemiLight.position.set( 0, 1, 0 );
 				scene.add( hemiLight );
@@ -171,70 +216,15 @@
 				renderer.gammaOutput = true;
 				renderer.shadowMap.enabled = true;
 				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.vr.enabled = true;
 
 				container.appendChild( renderer.domElement );
+				document.body.appendChild( WEBVR.createButton( renderer, { frameOfReferenceType: 'head-model' } ) );
 
 
 				initCar();
 				initMaterials();
 				initTrack();
-
-				var gui = new dat.GUI();
-				gui.add( params, 'Body', [ 'orange', 'blue', 'red', 'black', 'white', 'metallic' ] ).onChange( function ( value ) {
-					var index;
-					switch (value) {
-						case 'orange': index=0; 
-							break;
-						case 'blue': index=1; 
-							break;
-						case 'red': index=2; 
-							break;
-						case 'black': index=3; 
-							break;
-						case 'white': index=4; 
-							break;
-						case 'metallic': index=5; 
-							break;
-					}
-					var bodyMat = materialsLib.main[index];
-					carParts.body.forEach( function ( part ) { part.material = bodyMat; } );
-
-				} );
-				gui.add( params, 'Rim', [ 'orange', 'blue', 'red', 'black', 'white', 'metallic' ] ).onChange( function ( value ) {
-					var index;
-					switch (value) {
-						case 'orange': index=0; 
-							break;
-						case 'blue': index=1; 
-							break;
-						case 'red': index=2; 
-							break;
-						case 'black': index=3; 
-							break;
-						case 'white': index=4; 
-							break;
-						case 'metallic': index=5; 
-							break;
-					}
-					var rimMat = materialsLib.main[index];
-					carParts.rims.forEach( function ( part ) { part.material = rimMat; } );
-
-				} );
-				gui.add( params, 'Glass', [ 'clear', 'smoked', 'blue' ] ).onChange( function ( value ) {
-					var index;
-					switch (value) {
-						case 'clear': index=0; 
-							break;
-						case 'smoked': index=1; 
-							break;
-						case 'blue': index=2; 
-							break;
-					}
-					var glassMat = materialsLib.glass[index];
-					carParts.glass.forEach( function ( part ) { part.material = glassMat; } );
-
-				} );
-				gui.open();
 
 				window.addEventListener( 'resize', onWindowResize, false );
 				window.addEventListener( 'keyup', function(e){
@@ -245,6 +235,9 @@
 						console.log("p");
 					}
 					else if (e.keyCode==13) {
+						if (true) {
+							
+						}
 						console.log(carModel.position);
 						startCar=!startCar;
 				    	clocks.start();
@@ -317,6 +310,64 @@
 
 			}
 
+			function initGUI(){
+				var gui = new dat.GUI();
+				gui.add( params, 'Body', [ 'orange', 'blue', 'red', 'black', 'white', 'metallic' ] ).onChange( function ( value ) {
+					var index;
+					switch (value) {
+						case 'orange': index=0; 
+							break;
+						case 'blue': index=1; 
+							break;
+						case 'red': index=2; 
+							break;
+						case 'black': index=3; 
+							break;
+						case 'white': index=4; 
+							break;
+						case 'metallic': index=5; 
+							break;
+					}
+					var bodyMat = materialsLib.main[index];
+					carParts.body.forEach( function ( part ) { part.material = bodyMat; } );
+
+				} );
+				gui.add( params, 'Rim', [ 'orange', 'blue', 'red', 'black', 'white', 'metallic' ] ).onChange( function ( value ) {
+					var index;
+					switch (value) {
+						case 'orange': index=0; 
+							break;
+						case 'blue': index=1; 
+							break;
+						case 'red': index=2; 
+							break;
+						case 'black': index=3; 
+							break;
+						case 'white': index=4; 
+							break;
+						case 'metallic': index=5; 
+							break;
+					}
+					var rimMat = materialsLib.main[index];
+					carParts.rims.forEach( function ( part ) { part.material = rimMat; } );
+
+				} );
+				gui.add( params, 'Glass', [ 'clear', 'smoked', 'blue' ] ).onChange( function ( value ) {
+					var index;
+					switch (value) {
+						case 'clear': index=0; 
+							break;
+						case 'smoked': index=1; 
+							break;
+						case 'blue': index=2; 
+							break;
+					}
+					var glassMat = materialsLib.glass[index];
+					carParts.glass.forEach( function ( part ) { part.material = glassMat; } );
+
+				} );
+				gui.open();
+			}
 			function initMaterials() {
 				materialsLib = {
 					main: [
@@ -364,6 +415,12 @@
 								object.add( lightHolder );
 								object.rotation.y= -Math.PI /2;
 								scene.add( object );
+
+								if ( object.isMesh  ) {
+									object.castShadow = true;
+									object.receiveShadow = true;
+									object.material.envMap = envMap;
+								}
 
 							}, onProgress, onError );
 
@@ -413,10 +470,10 @@
 			}, 25);
 
 			function resetPosition() {
-				// if ( carModel.position.distanceTo( origin ) > 200 ) {
-				// 	carModel.position.copy( origin );
-				// 	car.speed = 0;
-				// }
+				if ( carModel.position.distanceTo( origin ) > 200 ) {
+					carModel.position.copy( origin );
+					car.speed = 0;
+				}
 			}
 
 			init();
