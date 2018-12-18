@@ -85,6 +85,7 @@
 		<link rel="stylesheet" href="../FlipClock-master/compiled/flipclock.css">
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 		<script src="../FlipClock-master/compiled/flipclock.js"></script>
+		<script src="../cannon.js-master/build/cannon.js"></script>
 		<script src="https://cdn.rawgit.com/Mikhus/canvas-gauges/gh-pages/download/2.1.5/all/gauge.min.js"></script> 
 		<script src="js/WebGL.js"></script>
 		<script>
@@ -127,7 +128,7 @@
 				scene.background = envMap;
 
 				var ground = new THREE.Mesh(
-					new THREE.PlaneBufferGeometry( 400, 400 ),
+					new THREE.PlaneBufferGeometry( 100, 100 ),
 					new THREE.ShadowMaterial( { color: 0x000000, opacity: 0.15, depthWrite: false }
 				) );
 				ground.rotation.x = - Math.PI / 2;
@@ -141,11 +142,11 @@
 					Glass: 'clear'
 				};
 
-				var grid = new THREE.GridHelper( 400, 40, 0x000000, 0x000000 );
-				grid.material.opacity = 0.2;
-				grid.material.depthWrite = false;
-				grid.material.transparent = true;
-				scene.add( grid );
+				// var grid = new THREE.GridHelper( 400, 40, 0x000000, 0x000000 );
+				// grid.material.opacity = 0.2;
+				// grid.material.depthWrite = false;
+				// grid.material.transparent = true;
+				// scene.add( grid );
 
 				var hemiLight = new THREE.HemisphereLight( 0x7c849b, 0xd7cbb1, 0.1 );
 				hemiLight.position.set( 0, 1, 0 );
@@ -268,9 +269,7 @@
 				loader.load( 'models/gltf/ferrari/ferrari.glb', function( gltf ) {
 
 					carModel = gltf.scene.children[ 0 ];
-
 					carModel.add( lightHolder );
-
 					car.setModel( carModel );
 
 					carModel.traverse( function ( child ) {
