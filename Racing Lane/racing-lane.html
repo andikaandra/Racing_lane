@@ -62,8 +62,10 @@
 				-webkit-box-align: center;
 				-moz-box-align: center;
 				box-align: center;
+				background: url('Capture.jpg');
+				background-size: auto 100%;
+			    background-repeat: no-repeat;
 
-				color: #ffffff;
 				text-align: center;
 
 				cursor: pointer;
@@ -150,7 +152,7 @@
 			var damping = 5.0;
 			var distance = 5;
 			var cameraTarget = new THREE.Vector3();
-			var origin = new THREE.Vector3();
+			var origin = new THREE.Vector3(0, 0, 0);
 
 			var blocker = document.getElementById( 'blocker' );
 			var gauge = document.getElementById( 'gauges' );
@@ -236,7 +238,7 @@
 					}
 					else if (e.keyCode==13) {
 						if (true) {
-							
+
 						}
 						console.log(carModel.position);
 						startCar=!startCar;
@@ -384,9 +386,7 @@
 						new THREE.MeshStandardMaterial( { color: 0x000000, envMap: envMap, metalness: 0.9, roughness: 0.1, opacity: 0.15, transparent: true, premultipliedAlpha: true, name: 'smoked' } ),
 						new THREE.MeshStandardMaterial( { color: 0x001133, envMap: envMap, metalness: 0.9, roughness: 0.1, opacity: 0.15, transparent: true, premultipliedAlpha: true, name: 'blue' } ),
 					],
-
 				}
-
 			}
 
 			var onProgress = function ( xhr ) {
@@ -401,29 +401,22 @@
 			function initTrack() {
 				THREE.Loader.Handlers.add( /\.dds$/i, new THREE.DDSLoader() );
 
-				new THREE.MTLLoader()
-					.setPath( 'models/obj/' )
-					.load( 'track.mtl', function ( materials ) {
+				new THREE.MTLLoader().setPath( 'models/obj/' ).load( 'track4d.mtl', function ( materials ) {
 
 						materials.preload();
 
-						new THREE.OBJLoader()
-							.setMaterials( materials )
-							.setPath( 'models/obj/' )
-							.load( 'track.obj', function ( object ) {
+						new THREE.OBJLoader().setMaterials( materials ).setPath( 'models/obj/' ).load( 'track4d.obj', function ( object ) {
 								object.scale.set(12,12,12);
 								object.add( lightHolder );
 								object.rotation.y= -Math.PI /2;
 								scene.add( object );
-
 								if ( object.isMesh  ) {
+									console.log("msh");
 									object.castShadow = true;
 									object.receiveShadow = true;
 									object.material.envMap = envMap;
 								}
-
 							}, onProgress, onError );
-
 					} );
 			}
 
@@ -446,7 +439,7 @@
 						car.update( delta / 3, 1 );
 					}
 					resetPosition();
-					// keep the light (and shadow) pointing in the same direction as the car rotates
+
 					lightHolder.rotation.y = -carModel.rotation.y;
 
 					carModel.getWorldPosition( cameraTarget );
@@ -470,8 +463,8 @@
 			}, 25);
 
 			function resetPosition() {
-				if ( carModel.position.distanceTo( origin ) > 200 ) {
-					carModel.position.copy( origin );
+				if ( carModel.position.distanceTo( origin ) > 150 ) {
+					carModel.position.set(14.000842061352705, 0, -70.16754624860691);
 					car.speed = 0;
 				}
 			}
@@ -479,12 +472,10 @@
 			init();
 
 			$(document).ready(function() {
-
 				clocks = $('.clock').FlipClock({
 			        clockFace: 'MinuteCounter',
 			        autoStart: false,
 			    });
-
 			});
 		</script>
 	</body>
