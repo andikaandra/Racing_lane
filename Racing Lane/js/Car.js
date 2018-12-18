@@ -47,31 +47,23 @@ THREE.Car = ( function ( ) {
 			rrWheel: 'wheel_rr',
 			steeringWheel: 'steering_wheel',
 		};
-		
-		// km/hr
+
 		this.maxSpeed = maxSpeed || 30;
 		maxSpeedReverse = - this.maxSpeed * 0.25;
 
-		// m/s
 		this.acceleration = acceleration || 10;
 		accelerationReverse = this.acceleration * 0.5;
 
-		// metres
 		this.turningRadius = turningRadius || 4.5;
 
-		// m/s
 		deceleration = this.acceleration * 2;
 
-		// multiplied with deceleration, so breaking deceleration = ( acceleration * 2 * brakePower ) m/s
 		this.brakePower = brakePower || 5;
 
-		// exposed so that a user can use this for various effect, e.g blur
 		this.speed = 0;
 
-		// keys used to control car - by default the arrow keys and space to brake
 		controlKeys = keys || controlKeys;
 
-		// local axes of rotation - these are likely to vary between models
 		this.wheelRotationAxis = 'x';
 		this.wheelTurnAxis = 'z';
 		this.steeringWheelTurnAxis = 'y';
@@ -188,7 +180,7 @@ THREE.Car = ( function ( ) {
 			var forwardDelta = - this.speed * delta;
 
 			carOrientation -= ( forwardDelta * this.turningRadius * 0.02 ) * wheelOrientation;
-			// movement of car
+
 			root.position.x += Math.sin( carOrientation ) * forwardDelta * length;
 			root.position.z += Math.cos( carOrientation ) * forwardDelta * length;
 
