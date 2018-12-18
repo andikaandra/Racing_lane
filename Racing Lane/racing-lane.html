@@ -415,11 +415,11 @@
 			function initTrack() {
 				THREE.Loader.Handlers.add( /\.dds$/i, new THREE.DDSLoader() );
 
-				new THREE.MTLLoader().setPath( 'models/obj/' ).load( 'track4d.mtl', function ( materials ) {
+				new THREE.MTLLoader().setPath( 'models/obj/' ).load( 'track2d.mtl', function ( materials ) {
 
 						materials.preload();
 
-						new THREE.OBJLoader().setMaterials( materials ).setPath( 'models/obj/' ).load( 'track4d.obj', function ( object ) {
+						new THREE.OBJLoader().setMaterials( materials ).setPath( 'models/obj/' ).load( 'track2d.obj', function ( object ) {
 								object.scale.set(12,12,12);
 								object.add( lightHolder );
 								object.rotation.y= -Math.PI /2;
