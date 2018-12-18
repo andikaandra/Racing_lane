@@ -75,7 +75,7 @@
 	</head>
 
 	<body>
-		<p style="position:absolute; font-size:40px; color:springgreen; margin-left: 50px">Lap <span id="lap">0</span></p>
+		<p style="position:absolute; font-size:40px; color:#4173fa; margin-left: 20px; margin-top: 150px;font-family: helvetica;font-weight: bolder;">Lap <span id="lap">0</span></p>
 		<div id="blocker">
 			<div id="instructions">
 				<span style="font-size:40px">Click to play</span>
@@ -245,7 +245,8 @@
 						if (started) {
 							console.log(carModel.position);
 							startCar=!startCar;
-					    	clocks.start();
+							clocks.start();
+							lapCount=1;
 							$("#clock").css("display", "block");
 							carModel.position.set(14.000842061352705, 0.25, -70.16754624860691);
 							started=!started;
