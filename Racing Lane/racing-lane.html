@@ -157,6 +157,7 @@
 			var startCar = 0;
 			var damping = 5.0;
 			var distance = 5;
+			var mulai=0;
 			var cameraTarget = new THREE.Vector3();
 			var origin = new THREE.Vector3(0, 0, 0);
 
@@ -248,6 +249,7 @@
 							console.log(carModel.position);
 							startCar=!startCar;
 							clocks.start();
+							mulai=1;
 							lapCount=0;
 							$("#clock").css("display", "block");
 							$("#lapCounter").css("display", "block");
@@ -420,8 +422,8 @@
 			function initTrack() {
 				var wallGeometry = new THREE.CubeGeometry( 15, 15, 10, 1, 1, 1 );
 				var wallMaterial = new THREE.MeshBasicMaterial( {color: 0xffffff} );
-				wallMaterial.transparent =true;
-				wallMaterial.opacity = 0;
+				// wallMaterial.transparent =true;
+				// wallMaterial.opacity = 0;
 				var wall = new THREE.Mesh(wallGeometry, wallMaterial);
 				wall.position.set(15.000842061352705, 0, -70.16754624860691);
 				scene.add(wall);
@@ -471,7 +473,7 @@
 					var directionVector = carModel.getWorldDirection(cameraTarget);
 					var ray = new THREE.Raycaster( carModel.getWorldPosition( cameraTarget ), directionVector.clone().normalize() );
 					var collisionResults = ray.intersectObjects( collidableMeshList );
-					if ( collisionResults.length > 0 && collisionResults[0].distance < 8 ) 
+					if ( collisionResults.length > 0 && collisionResults[0].distance < 8 && mulai) 
 					{
 						console.log("Collision");
 						if (lastposition != 1 )
@@ -495,7 +497,7 @@
 					else{
 						lastposition =0;
 					}
-					
+					// console.log(lastposition);
 					lightHolder.rotation.y = -carModel.rotation.y;
 
 					carModel.getWorldPosition( cameraTarget );
