@@ -422,8 +422,8 @@
 			function initTrack() {
 				var wallGeometry = new THREE.CubeGeometry( 15, 15, 10, 1, 1, 1 );
 				var wallMaterial = new THREE.MeshBasicMaterial( {color: 0xffffff} );
-				// wallMaterial.transparent =true;
-				// wallMaterial.opacity = 0;
+				wallMaterial.transparent =true;
+				wallMaterial.opacity = 0;
 				var wall = new THREE.Mesh(wallGeometry, wallMaterial);
 				wall.position.set(15.000842061352705, 0, -70.16754624860691);
 				scene.add(wall);
